@@ -24,9 +24,5 @@ let package = Package(
             dependencies: [],
             path: "Sources/"
         ),
-        .testTarget(
-            name: "MSPackageTests",
-            dependencies: ["MSPackage"]
-        ),
     ]
 )
