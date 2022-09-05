@@ -8,21 +8,22 @@ let package = Package(
     products: [
         .library(
             name: "MSPackage",
-            targets: ["MSPackage"]
-        ),
+            targets: ["MSPackage"]),
     ],
     dependencies: [
         .package(
-            name: "swift-composable-architecture",
-            url: "https://github.com/pointfreeco/swift-composable-architecture",
-            from: "0.39.1"
-        )
+            url: "https://github.com/pointfreeco/swift-composable-architecture.git",
+            from: "0.39.1")
     ],
     targets: [
         .target(
             name: "MSPackage",
-            dependencies: ["swift-composable-architecture"],
-            path: "Sources/"
-        ),
+            dependencies: [
+                .product(
+                    name: "ComposableArchitecture",
+                    package: "swift-composable-architecture"
+                )
+            ],
+            path: "Sources/"),
     ]
 )
