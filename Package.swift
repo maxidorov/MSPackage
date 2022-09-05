@@ -5,6 +5,9 @@ import PackageDescription
 
 let package = Package(
     name: "MSPackage",
+    platforms: [
+        .iOS("14.0")
+    ],
     products: [
         .library(
             name: "MSPackage",
