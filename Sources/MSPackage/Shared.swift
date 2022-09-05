@@ -5,12 +5,14 @@
 //  Created by MSP on 06.09.2022.
 //
 
+#if os(iOS)
+
 import SwiftUI
 import ComposableArchitecture
 
-typealias Action = () -> Void
+public typealias Action = () -> Void
 
-extension View {
+public extension View {
     func border(
         color: Color,
         cornerRadius: CGFloat,
@@ -36,7 +38,7 @@ extension View {
     }
 }
 
-extension View {
+public extension View {
     func sheet<State, Action, Content>(
         isPresented: Bool,
         store: Store<State, Action>,
@@ -68,7 +70,7 @@ extension View {
     }
 }
 
-enum AlertStrings {
+public enum AlertStrings {
     case custom(title: String, message: String?)
     case error
 
@@ -82,7 +84,7 @@ enum AlertStrings {
     }
 }
 
-extension View {
+public extension View {
     func alert(
         _ alertStrings: AlertStrings,
         dismissButton: Alert.Button,
@@ -98,7 +100,7 @@ extension View {
     }
 }
 
-extension Double {
+public extension Double {
     func format(_ format: String) -> String {
         String(format: "%\(format)f", self)
     }
@@ -117,7 +119,7 @@ extension Double {
     }
 }
 
-extension Int {
+public extension Int {
     var minAndSec: String {
         let minutes = Int(self) / 60
         let seconds = Int(self) % 60
@@ -134,7 +136,7 @@ extension Int {
     }
 }
 
-extension ViewStore {
+public extension ViewStore {
     func sendAnimated(_ action: Action) {
         withAnimation {
             send(action)
@@ -142,7 +144,7 @@ extension ViewStore {
     }
 }
 
-extension Date {
+public extension Date {
     var startOfToday: Date {
         Calendar.current.startOfDay(for: self)
     }
@@ -163,7 +165,7 @@ extension Date {
     }
 }
 
-extension Result where Failure == Never {
+public extension Result where Failure == Never {
     var value: Success {
         switch self {
         case let .success(value):
@@ -174,10 +176,14 @@ extension Result where Failure == Never {
     }
 }
 
-struct CloseButton: View {
-    let action: Action
+public struct CloseButton: View {
+    private let action: Action
 
-    var body: some View {
+    public init(action: @escaping Action) {
+        self.action = action
+    }
+
+    public var body: some View {
         Image(systemName: "xmark")
             .resizable()
             .frame(square: 22)
@@ -186,3 +192,4 @@ struct CloseButton: View {
     }
 }
 
+#endif
