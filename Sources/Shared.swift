@@ -138,7 +138,7 @@ public extension Int {
 
 public extension ViewStore {
     func sendAnimated(_ action: Action) {
-        withAnimation {
+        _ = withAnimation {
             send(action)
         }
     }
