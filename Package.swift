@@ -13,6 +13,7 @@ let package = Package(
     ],
     dependencies: [
         .package(
+            name: "swift-composable-architecture",
             url: "https://github.com/pointfreeco/swift-composable-architecture",
             from: "0.39.1"
         )
@@ -20,7 +21,7 @@ let package = Package(
     targets: [
         .target(
             name: "MSPackage",
-            dependencies: [],
+            dependencies: ["swift-composable-architecture"],
             path: "Sources/"
         ),
     ]
