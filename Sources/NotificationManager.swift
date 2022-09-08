@@ -8,10 +8,10 @@
 import UserNotifications
 import ComposableArchitecture
 
-public final class NotificationManager {
-  private let notificationCenter = UNUserNotificationCenter.current()
+public enum NotificationManager {
+  private static let notificationCenter = UNUserNotificationCenter.current()
 
-  public func requestAuthorization() -> Effect<Bool, Never> {
+  public static func requestAuthorization() -> Effect<Bool, Never> {
     Effect.task {
       let requestResult = try? await self.notificationCenter.requestAuthorization(
         options: .badge
@@ -20,7 +20,7 @@ public final class NotificationManager {
     }
   }
 
-  public func setupEveryDayNotification(
+  public static func setupEveryDayNotification(
     title: String,
     body: String,
     at dateComponents: DateComponents
@@ -58,7 +58,7 @@ public final class NotificationManager {
     }
   }
 
-  public func removeAllPendingNotifications() {
+  public static func removeAllPendingNotifications() {
     notificationCenter.removeAllPendingNotificationRequests()
   }
 }
