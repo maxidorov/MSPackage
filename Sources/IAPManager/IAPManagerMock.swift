@@ -9,7 +9,7 @@ public final class IAPManagerMock: IAPManagerProtocol {
     public var hasPremiumAccess: Bool
 
     public init(
-        hasPremiumAccess: Bool = false
+        hasPremiumAccess: Bool
     ) {
         self.hasPremiumAccess = hasPremiumAccess
     }
