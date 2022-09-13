@@ -2,6 +2,15 @@
   "object": {
     "pins": [
       {
+        "package": "ApphudSDK",
+        "repositoryURL": "https://github.com/apphud/ApphudSDK",
+        "state": {
+          "branch": null,
+          "revision": "9217783cfdc19c29cc5b82b6c07659ec6df899cd",
+          "version": "2.8.8"
+        }
+      },
+      {
         "package": "combine-schedulers",
         "repositoryURL": "https://github.com/pointfreeco/combine-schedulers",
         "state": {

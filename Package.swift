@@ -16,7 +16,10 @@ let package = Package(
     dependencies: [
         .package(
             url: "https://github.com/pointfreeco/swift-composable-architecture.git",
-            from: "0.40.2")
+            from: "0.40.2"),
+        .package(
+            url: "https://github.com/apphud/ApphudSDK",
+            from: "2.8.8")
     ],
     targets: [
         .target(
@@ -25,7 +28,10 @@ let package = Package(
                 .product(
                     name: "ComposableArchitecture",
                     package: "swift-composable-architecture"
-                )
+                ),
+                .product(
+                    name: "ApphudSDK",
+                    package: "ApphudSDK")
             ],
             path: "Sources/"),
     ]
