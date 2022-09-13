@@ -9,6 +9,9 @@ import ApphudSDK
 import StoreKit
 
 public final class IAPManager: IAPManagerProtocol {
+    
+    public init() {}
+
     public var hasPremiumAccess: Bool {
         Apphud.hasPremiumAccess()
     }
