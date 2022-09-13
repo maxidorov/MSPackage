@@ -8,8 +8,8 @@
 import ApphudSDK
 import StoreKit
 
-final class IAPManager: IAPManagerProtocol {
-    var hasPremiumAccess: Bool {
+public final class IAPManager: IAPManagerProtocol {
+    public var hasPremiumAccess: Bool {
         Apphud.hasPremiumAccess()
     }
 }

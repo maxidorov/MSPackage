@@ -7,6 +7,6 @@
 
 import StoreKit
 
-protocol IAPManagerProtocol {
+public protocol IAPManagerProtocol {
     var hasPremiumAccess: Bool { get }
 }
