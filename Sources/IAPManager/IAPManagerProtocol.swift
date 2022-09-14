@@ -10,5 +10,12 @@ import StoreKit
 
 public protocol IAPManagerProtocol {
     var hasPremiumAccess: Bool { get }
-    func getProduct(by id: String) -> Effect<SKProduct?, Never>
+
+    func getProduct(
+        by id: String
+    ) -> Effect<SKProduct?, Never>
+
+    func getProducts(
+        by ids: Set<String>
+    ) -> Effect<[String: SKProduct], Never>
 }

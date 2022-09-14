@@ -17,7 +17,15 @@ public final class IAPManagerMock: IAPManagerProtocol {
         self.hasPremiumAccess = hasPremiumAccess
     }
 
-    public func getProduct(by id: String) -> Effect<SKProduct?, Never> {
+    public func getProduct(
+        by id: String
+    ) -> Effect<SKProduct?, Never> {
         .init(value: nil)
+    }
+
+    public func getProducts(
+        by ids: Set<String>
+    ) -> Effect<[String: SKProduct], Never> {
+        .init(value: [:])
     }
 }
