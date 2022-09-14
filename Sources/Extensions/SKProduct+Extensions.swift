@@ -16,6 +16,8 @@ extension SKProduct {
     }
 
     public var localizedSubscriptionPeriod: String? {
+        // TODO: remove 1 in '1 year', '1 month'...
+
         guard let subscriptionPeriod = subscriptionPeriod else { return "" }
 
         let dateComponents: DateComponents
@@ -38,4 +40,6 @@ extension SKProduct {
             unitsStyle: .full
         )
     }
+
+    // TODO: add trial period description
 }
