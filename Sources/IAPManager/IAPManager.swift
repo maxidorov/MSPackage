@@ -59,15 +59,6 @@ public final class IAPManager: IAPManagerProtocol {
     ) -> Effect<Bool, IAPError> {
         .future { promise in
             Apphud.purchase(id) { result in
-                if let skError = result.error as? SKError {
-                    return promise(.failure(.skError(skError)))
-                }
-
-                if let apphudError = result.error as? ApphudError {
-                    let description = apphudError.localizedDescription
-                    return promise(.failure(.custom(description)))
-                }
-
                 if let subscription = result.subscription,
                    subscription.isActive() {
                     return promise(.success(true))
@@ -76,6 +67,15 @@ public final class IAPManager: IAPManagerProtocol {
                 if let purchase = result.nonRenewingPurchase,
                    purchase.isActive() {
                     return promise(.success(true))
+                }
+
+                if let skError = result.error as? SKError {
+                    return promise(.failure(.skError(skError)))
+                }
+
+                if let apphudError = result.error as? ApphudError {
+                    let description = apphudError.localizedDescription
+                    return promise(.failure(.custom(description)))
                 }
 
                 return promise(.success(false))
