@@ -8,7 +8,7 @@
 import ComposableArchitecture
 import StoreKit
 
-public enum IAPError: Error {
+public enum IAPError: Error, Equatable {
     case skError(SKError)
     case custom(String)
 }
