@@ -18,7 +18,7 @@ extension SKProduct {
     public var localizedSubscriptionPeriod: String? {
         // TODO: remove 1 in '1 year', '1 month'...
 
-        guard let subscriptionPeriod = subscriptionPeriod else { return "" }
+        guard let subscriptionPeriod = subscriptionPeriod else { return nil }
 
         let dateComponents: DateComponents
 
