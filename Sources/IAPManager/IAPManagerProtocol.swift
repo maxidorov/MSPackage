@@ -8,6 +8,11 @@
 import ComposableArchitecture
 import StoreKit
 
+public enum IAPError: Error {
+    case skError(SKError)
+    case custom(String)
+}
+
 public protocol IAPManagerProtocol {
     var hasPremiumAccess: Bool { get }
 
@@ -18,4 +23,8 @@ public protocol IAPManagerProtocol {
     func getProducts(
         by ids: Set<String>
     ) -> Effect<[String: SKProduct], Never>
+
+    func purchaseProduct(
+        with id: String
+    ) -> Effect<Bool, IAPError>
 }

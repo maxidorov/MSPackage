@@ -28,4 +28,10 @@ public final class IAPManagerMock: IAPManagerProtocol {
     ) -> Effect<[String: SKProduct], Never> {
         .init(value: [:])
     }
+
+    public func purchaseProduct(
+        with id: String
+    ) -> Effect<Bool, IAPError> {
+        .init(value: true)
+    }
 }
