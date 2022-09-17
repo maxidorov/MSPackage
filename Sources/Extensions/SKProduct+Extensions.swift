@@ -9,10 +9,7 @@ import StoreKit
 
 extension SKProduct {
     public var localizedPrice: String? {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .currency
-        formatter.locale = priceLocale
-        return formatter.string(from: price)
+        appendCurrency(to: price)
     }
 
     public var localizedSubscriptionPeriod: String? {
@@ -41,5 +38,12 @@ extension SKProduct {
         )
     }
 
-    // TODO: add trial period description
+    public func appendCurrency(to price: NSDecimalNumber) -> String? {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .currency
+        formatter.locale = priceLocale
+        return formatter.string(from: price)?
+            .replacingOccurrences(of: ".00", with: "")
+            .replacingOccurrences(of: ",00", with: "")
+    }
 }
