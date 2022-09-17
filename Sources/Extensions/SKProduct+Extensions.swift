@@ -9,7 +9,6 @@ import StoreKit
 
 extension SKProduct {
     public var localizedPrice: String? {
-//        appendCurrency(to: price)
         localizedPrice(dividedBy: 1)
     }
 

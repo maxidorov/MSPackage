@@ -82,6 +82,16 @@ public final class IAPManager: IAPManagerProtocol {
             }
         }
     }
+
+    public func restorePurchases() -> Effect<Bool, Never> {
+        .task {
+            await withCheckedContinuation { continuation in
+                Apphud.restorePurchases { _, _, _ in
+                    continuation.resume(returning: Apphud.hasPremiumAccess())
+                }
+            }
+        }
+    }
 }
 
 

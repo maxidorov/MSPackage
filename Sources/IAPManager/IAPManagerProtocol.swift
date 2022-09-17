@@ -27,4 +27,6 @@ public protocol IAPManagerProtocol {
     func purchaseProduct(
         with id: String
     ) -> Effect<Bool, IAPError>
+
+    func restorePurchases() -> Effect<Bool, Never>
 }

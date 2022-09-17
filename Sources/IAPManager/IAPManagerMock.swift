@@ -34,4 +34,8 @@ public final class IAPManagerMock: IAPManagerProtocol {
     ) -> Effect<Bool, IAPError> {
         .init(value: true)
     }
+
+    public func restorePurchases() -> Effect<Bool, Never> {
+        .init(value: true)
+    }
 }
