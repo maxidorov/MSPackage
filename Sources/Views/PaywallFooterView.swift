@@ -7,8 +7,8 @@
 
 import SwiftUI
 
-struct PaywallFooterView: View {
-  struct Model {
+public struct PaywallFooterView: View {
+  public struct Model {
     let privacyPolicyTapped: Action
     let termsOfUseTapped: Action
     let restorePurchasesTapped: Action
@@ -16,7 +16,11 @@ struct PaywallFooterView: View {
 
   let model: Model
 
-  var body: some View {
+  public init(model: Model) {
+    self.model = model
+  }
+
+  public var body: some View {
     GeometryReader { geo in
       let textWidth = geo.size.width / 3
 
