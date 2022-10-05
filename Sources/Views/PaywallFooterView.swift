@@ -12,6 +12,16 @@ public struct PaywallFooterView: View {
     let privacyPolicyTapped: Action
     let termsOfUseTapped: Action
     let restorePurchasesTapped: Action
+
+    public init(
+      privacyPolicyTapped: @escaping Action,
+      termsOfUseTapped: @escaping Action,
+      restorePurchasesTapped: @escaping Action
+    ) {
+      self.privacyPolicyTapped = privacyPolicyTapped
+      self.termsOfUseTapped = termsOfUseTapped
+      self.restorePurchasesTapped = restorePurchasesTapped
+    }
   }
 
   let model: Model
