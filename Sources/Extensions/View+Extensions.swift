@@ -40,6 +40,22 @@ public extension View {
     clipShape(RoundedCorner(radius: radius, corners: corners))
   }
 
+  func isLoading(_ isLoading: Bool) -> some View {
+    @ViewBuilder
+    var progressViewIfNeeded: some View {
+      if isLoading {
+        ProgressView()
+      } else {
+        EmptyView()
+      }
+    }
+
+    return self
+      .disabled(isLoading)
+      .opacity(isLoading ? 0.5 : 1)
+      .overlay(progressViewIfNeeded)
+  }
+
   func asButton(action: @escaping Action) -> some View {
     Button(action: action, label: { self })
       .buttonStyle(.plain)
