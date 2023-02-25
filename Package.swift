@@ -18,8 +18,8 @@ let package = Package(
             url: "https://github.com/pointfreeco/swift-composable-architecture.git",
             from: "0.40.2"),
         .package(
-            url: "https://github.com/apphud/ApphudSDK",
-            from: "2.8.8")
+            url: "https://github.com/adaptyteam/AdaptySDK-iOS.git",
+            from: "2.3.4")
     ],
     targets: [
         .target(
@@ -30,8 +30,8 @@ let package = Package(
                     package: "swift-composable-architecture"
                 ),
                 .product(
-                    name: "ApphudSDK",
-                    package: "ApphudSDK")
+                    name: "Adapty",
+                    package: "AdaptySDK-iOS")
             ],
             path: "Sources/"),
     ]

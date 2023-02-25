@@ -11,9 +11,7 @@ import StoreKit
 public final class IAPManagerMock: IAPManagerProtocol {
     public var hasPremiumAccess: Bool
 
-    public init(
-        hasPremiumAccess: Bool
-    ) {
+    public init(hasPremiumAccess: Bool) {
         self.hasPremiumAccess = hasPremiumAccess
     }
 

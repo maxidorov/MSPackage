@@ -2,12 +2,12 @@
   "object": {
     "pins": [
       {
-        "package": "ApphudSDK",
-        "repositoryURL": "https://github.com/apphud/ApphudSDK",
+        "package": "Adapty",
+        "repositoryURL": "https://github.com/adaptyteam/AdaptySDK-iOS.git",
         "state": {
           "branch": null,
-          "revision": "9217783cfdc19c29cc5b82b6c07659ec6df899cd",
-          "version": "2.8.8"
+          "revision": "8aa82ff00f58e53fbd384a596e058a1aaa0a1a4f",
+          "version": "2.3.4"
         }
       },
       {

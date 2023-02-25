@@ -5,16 +5,20 @@
 //  Created by MSP on 14.09.2022.
 //
 
-import ApphudSDK
+import Adapty
 import ComposableArchitecture
 import StoreKit
 
 public final class IAPManager: IAPManagerProtocol {
 
-    public init() {}
+    @Storage
+    public var hasPremiumAccess: Bool
 
-    public var hasPremiumAccess: Bool {
-        Apphud.hasPremiumAccess()
+    public init(hasPremiumAccessKey: String) {
+        self._hasPremiumAccess = .init(
+            key: hasPremiumAccessKey,
+            defaultValue: false
+        )
     }
 
     public func getProduct(
@@ -25,10 +29,12 @@ public final class IAPManager: IAPManagerProtocol {
                 return nil
             }
 
-            let paywalls = await self.getPaywalls()
-            let products = paywalls.flatMap(\.products)
-            let product = products.first(where: { $0.productId == id })
-            return product?.skProduct
+            do {
+                let products = try await self.getProducts()
+                return products.first(where: { $0.vendorProductId == id })?.skProduct
+            } catch {
+                return nil
+            }
         }
     }
 
@@ -40,45 +46,45 @@ public final class IAPManager: IAPManagerProtocol {
                 return [:]
             }
 
-            let products = await self.getPaywalls()
-                .flatMap(\.products)
-                .filter { ids.contains($0.productId) }
+            do {
+                let products = try await self.getProducts()
+                    .map(\.skProduct)
+                    .filter { ids.contains($0.productIdentifier) }
 
-            return .init(
-                uniqueKeysWithValues: products.compactMap { product in
-                    product.skProduct.map { skProduct in
-                        (product.productId, skProduct)
+                return .init(
+                    uniqueKeysWithValues: products.compactMap { product in
+                        (product.productIdentifier, product)
                     }
-                }
-            )
+                )
+            } catch {
+                return [:]
+            }
         }
     }
 
     public func purchaseProduct(
         with id: String
     ) -> Effect<Bool, IAPError> {
-        .future { promise in
-            Apphud.purchase(id) { result in
-                if let subscription = result.subscription,
-                   subscription.isActive() {
-                    return promise(.success(true))
-                }
+        .future { [weak self] promise in
+            guard let self else {
+                return promise(.failure(.custom("self is nil")))
+            }
 
-                if let purchase = result.nonRenewingPurchase,
-                   purchase.isActive() {
-                    return promise(.success(true))
-                }
+            Task {
+                do {
+                    let products = try await self.getProducts()
 
-                if let skError = result.error as? SKError {
-                    return promise(.failure(.skError(skError)))
-                }
+                    guard let productToPurchase = products.first(where: {
+                        $0.skProduct.productIdentifier == id
+                    }) else { return promise(.failure(.custom("Product with id \(id) not found"))) }
 
-                if let apphudError = result.error as? ApphudError {
-                    let description = apphudError.localizedDescription
-                    return promise(.failure(.custom(description)))
-                }
+                    let profile = try await Adapty.makePurchase(product: productToPurchase)
 
-                return promise(.success(false))
+                    self.hasPremiumAccess = profile.hasPremiumAccessLevel
+                    return promise(.success(profile.hasPremiumAccessLevel))
+                } catch {
+                    return promise(.failure(.custom("Unexpected error")))
+                }
             }
         }
     }
@@ -86,8 +92,14 @@ public final class IAPManager: IAPManagerProtocol {
     public func restorePurchases() -> Effect<Bool, Never> {
         .task {
             await withCheckedContinuation { continuation in
-                Apphud.restorePurchases { _, _, _ in
-                    continuation.resume(returning: Apphud.hasPremiumAccess())
+                Adapty.restorePurchases { result in
+                    switch result {
+                    case let .success(profile):
+                        self.hasPremiumAccess = profile.hasPremiumAccessLevel
+                        continuation.resume(returning: profile.hasPremiumAccessLevel)
+                    case .failure:
+                        continuation.resume(returning: false)
+                    }
                 }
             }
         }
@@ -97,11 +109,17 @@ public final class IAPManager: IAPManagerProtocol {
 
 // MARK: private
 extension IAPManager {
-    private func getPaywalls() async -> [ApphudPaywall] {
-        await withCheckedContinuation { continuation in
-            Apphud.paywallsDidLoadCallback { paywalls in
-                continuation.resume(returning: paywalls)
-            }
+    private func getProducts() async throws -> [AdaptyPaywallProduct] {
+        guard let mainPaywall = try await Adapty.getPaywall("main") else {
+            return []
         }
+        let products = try await Adapty.getPaywallProducts(paywall: mainPaywall)
+        return products ?? []
+    }
+}
+
+private extension AdaptyProfile {
+    var hasPremiumAccessLevel: Bool {
+        accessLevels["premium"]?.isActive ?? false
     }
 }
