@@ -9,8 +9,25 @@ import ComposableArchitecture
 import StoreKit
 
 public enum IAPError: Error, Equatable {
+    case error(String)
     case skError(SKError)
-    case custom(String)
+    case paywallNotFound(paywallId: String)
+    case productNotFound(productId: String)
+    case productsNotFound(Set<String>)
+    case selfIsNil
+    case unexpected
+}
+
+public struct IAPManagerGetResponse: Equatable {
+    public struct Product: Equatable {
+        public var skProduct: SKProduct
+        public var id: String
+    }
+    
+    public var paywallId: String
+    public var paywallVariationId: String
+    public var paywallConfigName: String
+    public var products: [Product]
 }
 
 public protocol IAPManagerProtocol {
@@ -18,15 +35,15 @@ public protocol IAPManagerProtocol {
 
     func getProduct(
         by id: String
-    ) -> Effect<SKProduct?, Never>
+    ) -> Effect<IAPManagerGetResponse, IAPError>
 
     func getProducts(
         by ids: Set<String>
-    ) -> Effect<[String: SKProduct], Never>
+    ) -> Effect<IAPManagerGetResponse, IAPError>
 
     func purchaseProduct(
         with id: String
     ) -> Effect<Bool, IAPError>
 
-    func restorePurchases() -> Effect<Bool, Never>
+    func restorePurchases() -> Effect<Bool, IAPError>
 }

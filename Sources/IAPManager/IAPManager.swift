@@ -10,6 +10,7 @@ import ComposableArchitecture
 import StoreKit
 
 public final class IAPManager: IAPManagerProtocol {
+    private let paywallId = "main"
 
     @Storage
     public var hasPremiumAccess: Bool
@@ -23,41 +24,73 @@ public final class IAPManager: IAPManagerProtocol {
 
     public func getProduct(
         by id: String
-    ) -> Effect<SKProduct?, Never> {
-        .task { [weak self] in
+    ) -> Effect<IAPManagerGetResponse, IAPError> {
+        .future { [weak self] promise in
             guard let self = self else {
-                return nil
+                return promise(.failure(.selfIsNil))
             }
 
-            do {
-                let products = try await self.getProducts()
-                return products.first(where: { $0.vendorProductId == id })?.skProduct
-            } catch {
-                return nil
+            Task {
+                do {
+                    guard let paywall = try await self.getPaywall(id: self.paywallId) else {
+                        return promise(.failure(.paywallNotFound(paywallId: self.paywallId)))
+                    }
+
+                    let products = try await self.getProducts(paywall: paywall)
+
+                    guard let skProduct =  products.first(where: { $0.vendorProductId == id })?.skProduct else {
+                        return promise(.failure(.productNotFound(productId: id)))
+                    }
+
+                    promise(.success(.init(
+                        paywallId: self.paywallId,
+                        paywallVariationId: paywall.variationId,
+                        paywallConfigName: paywall.name, // MARK: What is paywallConfigName?
+                        products: [.init(skProduct: skProduct, id: id)]
+                    )))
+                } catch {
+                    promise(.failure(.error(error.localizedDescription)))
+                }
             }
         }
     }
 
     public func getProducts(
         by ids: Set<String>
-    ) -> Effect<[String: SKProduct], Never> {
-        .task { [weak self] in
+    ) -> Effect<IAPManagerGetResponse, IAPError> {
+        .future { [weak self] promise in
             guard let self = self else {
-                return [:]
+                return promise(.failure(.selfIsNil))
             }
 
-            do {
-                let products = try await self.getProducts()
-                    .map(\.skProduct)
-                    .filter { ids.contains($0.productIdentifier) }
-
-                return .init(
-                    uniqueKeysWithValues: products.compactMap { product in
-                        (product.productIdentifier, product)
+            Task {
+                do {
+                    guard let paywall = try await self.getPaywall(id: self.paywallId) else {
+                        return promise(.failure(.paywallNotFound(paywallId: self.paywallId)))
                     }
-                )
-            } catch {
-                return [:]
+
+                    let products = try await self.getProducts(paywall: paywall)
+                        .map {
+                            IAPManagerGetResponse.Product(
+                                skProduct: $0.skProduct,
+                                id: $0.skProduct.productIdentifier
+                            )
+                        }
+                        .filter { ids.contains($0.id) }
+
+                    guard !products.isEmpty else {
+                        return promise(.failure(.productsNotFound(ids)))
+                    }
+
+                    promise(.success(.init(
+                        paywallId: self.paywallId,
+                        paywallVariationId: paywall.variationId,
+                        paywallConfigName: paywall.name,
+                        products: products
+                    )))
+                } catch {
+                    promise(.failure(.error(error.localizedDescription)))
+                }
             }
         }
     }
@@ -67,39 +100,40 @@ public final class IAPManager: IAPManagerProtocol {
     ) -> Effect<Bool, IAPError> {
         .future { [weak self] promise in
             guard let self else {
-                return promise(.failure(.custom("self is nil")))
+                return promise(.failure(.selfIsNil))
             }
 
             Task {
                 do {
-                    let products = try await self.getProducts()
+                    guard let paywall = try await self.getPaywall(id: self.paywallId) else {
+                        return promise(.failure(.paywallNotFound(paywallId: self.paywallId)))
+                    }
+
+                    let products = try await self.getProducts(paywall: paywall)
 
                     guard let productToPurchase = products.first(where: {
                         $0.skProduct.productIdentifier == id
-                    }) else { return promise(.failure(.custom("Product with id \(id) not found"))) }
+                    }) else { return promise(.failure(.productNotFound(productId: id))) }
 
                     let profile = try await Adapty.makePurchase(product: productToPurchase)
-
                     self.hasPremiumAccess = profile.hasPremiumAccessLevel
-                    return promise(.success(profile.hasPremiumAccessLevel))
+                    promise(.success(profile.hasPremiumAccessLevel))
                 } catch {
-                    return promise(.failure(.custom("Unexpected error")))
+                    promise(.failure(.error(error.localizedDescription)))
                 }
             }
         }
     }
 
-    public func restorePurchases() -> Effect<Bool, Never> {
-        .task {
-            await withCheckedContinuation { continuation in
-                Adapty.restorePurchases { result in
-                    switch result {
-                    case let .success(profile):
-                        self.hasPremiumAccess = profile.hasPremiumAccessLevel
-                        continuation.resume(returning: profile.hasPremiumAccessLevel)
-                    case .failure:
-                        continuation.resume(returning: false)
-                    }
+    public func restorePurchases() -> Effect<Bool, IAPError> {
+        .future { promise in
+            Adapty.restorePurchases { result in
+                switch result {
+                case let .success(profile):
+                    self.hasPremiumAccess = profile.hasPremiumAccessLevel
+                    promise(.success(profile.hasPremiumAccessLevel))
+                case let .failure(error):
+                    promise(.failure(.error(error.localizedDescription)))
                 }
             }
         }
@@ -109,11 +143,12 @@ public final class IAPManager: IAPManagerProtocol {
 
 // MARK: private
 extension IAPManager {
-    private func getProducts() async throws -> [AdaptyPaywallProduct] {
-        guard let mainPaywall = try await Adapty.getPaywall("main") else {
-            return []
-        }
-        let products = try await Adapty.getPaywallProducts(paywall: mainPaywall)
+    private func getPaywall(id: String) async throws -> AdaptyPaywall? {
+        try await Adapty.getPaywall(id)
+    }
+
+    private func getProducts(paywall: AdaptyPaywall) async throws -> [AdaptyPaywallProduct] {
+        let products = try await Adapty.getPaywallProducts(paywall: paywall)
         return products ?? []
     }
 }

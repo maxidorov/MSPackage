@@ -17,14 +17,14 @@ public final class IAPManagerMock: IAPManagerProtocol {
 
     public func getProduct(
         by id: String
-    ) -> Effect<SKProduct?, Never> {
-        .init(value: nil)
+    ) -> Effect<IAPManagerGetResponse, IAPError> {
+        .init(error: .unexpected)
     }
 
     public func getProducts(
         by ids: Set<String>
-    ) -> Effect<[String: SKProduct], Never> {
-        .init(value: [:])
+    ) -> Effect<IAPManagerGetResponse, IAPError> {
+        .init(error: .unexpected)
     }
 
     public func purchaseProduct(
@@ -33,7 +33,7 @@ public final class IAPManagerMock: IAPManagerProtocol {
         .init(value: true)
     }
 
-    public func restorePurchases() -> Effect<Bool, Never> {
+    public func restorePurchases() -> Effect<Bool, IAPError> {
         .init(value: true)
     }
 }
