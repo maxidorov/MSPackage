@@ -43,6 +43,7 @@ public final class IAPManager: IAPManagerProtocol {
                     }
 
                     promise(.success(.init(
+                        paywall: paywall,
                         paywallId: self.paywallId,
                         paywallVariationId: paywall.variationId,
                         paywallConfigName: paywall.name, // MARK: What is paywallConfigName?
@@ -83,6 +84,7 @@ public final class IAPManager: IAPManagerProtocol {
                     }
 
                     promise(.success(.init(
+                        paywall: paywall,
                         paywallId: self.paywallId,
                         paywallVariationId: paywall.variationId,
                         paywallConfigName: paywall.name,

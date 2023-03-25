@@ -7,6 +7,7 @@
 
 import ComposableArchitecture
 import StoreKit
+import Adapty
 
 public enum IAPError: Error, Equatable {
     case error(String)
@@ -23,11 +24,18 @@ public struct IAPManagerGetResponse: Equatable {
         public var skProduct: SKProduct
         public var id: String
     }
-    
+
+    public var paywall: AdaptyPaywall
     public var paywallId: String
     public var paywallVariationId: String
     public var paywallConfigName: String
     public var products: [Product]
+}
+
+extension AdaptyPaywall: Equatable {
+    public static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.id == rhs.id
+    }
 }
 
 public protocol IAPManagerProtocol {
