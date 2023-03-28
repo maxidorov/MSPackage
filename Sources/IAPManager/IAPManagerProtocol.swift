@@ -25,11 +25,28 @@ public struct IAPManagerGetResponse: Equatable {
         public var id: String
     }
 
+    public struct RemoteConfig: Equatable, Decodable {
+        public let canClose: Bool?
+        public let paywallTitle: String?
+        public let titleText: String?
+        public let subtitleText: String?
+        public let buttonText: String?
+
+        private enum CodingKeys : String, CodingKey {
+            case canClose = "can_close"
+            case paywallTitle = "paywall_title"
+            case titleText = "title_text"
+            case subtitleText = "subtitle_text"
+            case buttonText = "button_text"
+        }
+    }
+
     public var paywall: AdaptyPaywall
     public var paywallId: String
     public var paywallVariationId: String
     public var paywallConfigName: String
     public var products: [Product]
+    public var remoteConfig: RemoteConfig?
 }
 
 extension AdaptyPaywall: Equatable {
@@ -41,16 +58,13 @@ extension AdaptyPaywall: Equatable {
 public protocol IAPManagerProtocol {
     var hasPremiumAccess: Bool { get }
 
-    func getProduct(
-        by id: String
-    ) -> Effect<IAPManagerGetResponse, IAPError>
-
     func getProducts(
-        by ids: Set<String>
+        paywallId: String
     ) -> Effect<IAPManagerGetResponse, IAPError>
 
     func purchaseProduct(
-        with id: String
+        id: String,
+        paywallId: String
     ) -> Effect<Bool, IAPError>
 
     func restorePurchases() -> Effect<Bool, IAPError>

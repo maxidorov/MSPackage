@@ -10,8 +10,6 @@ import ComposableArchitecture
 import StoreKit
 
 public final class IAPManager: IAPManagerProtocol {
-    private let paywallId = "main"
-
     @Storage
     public var hasPremiumAccess: Bool
 
@@ -22,42 +20,8 @@ public final class IAPManager: IAPManagerProtocol {
         )
     }
 
-    public func getProduct(
-        by id: String
-    ) -> Effect<IAPManagerGetResponse, IAPError> {
-        .future { [weak self] promise in
-            guard let self = self else {
-                return promise(.failure(.selfIsNil))
-            }
-
-            Task {
-                do {
-                    guard let paywall = try await self.getPaywall(id: self.paywallId) else {
-                        return promise(.failure(.paywallNotFound(paywallId: self.paywallId)))
-                    }
-
-                    let products = try await self.getProducts(paywall: paywall)
-
-                    guard let skProduct =  products.first(where: { $0.vendorProductId == id })?.skProduct else {
-                        return promise(.failure(.productNotFound(productId: id)))
-                    }
-
-                    promise(.success(.init(
-                        paywall: paywall,
-                        paywallId: self.paywallId,
-                        paywallVariationId: paywall.variationId,
-                        paywallConfigName: paywall.name, // MARK: What is paywallConfigName?
-                        products: [.init(skProduct: skProduct, id: id)]
-                    )))
-                } catch {
-                    promise(.failure(.error(error.localizedDescription)))
-                }
-            }
-        }
-    }
-
     public func getProducts(
-        by ids: Set<String>
+        paywallId: String
     ) -> Effect<IAPManagerGetResponse, IAPError> {
         .future { [weak self] promise in
             guard let self = self else {
@@ -66,8 +30,8 @@ public final class IAPManager: IAPManagerProtocol {
 
             Task {
                 do {
-                    guard let paywall = try await self.getPaywall(id: self.paywallId) else {
-                        return promise(.failure(.paywallNotFound(paywallId: self.paywallId)))
+                    guard let paywall = try await self.getPaywall(id: paywallId) else {
+                        return promise(.failure(.paywallNotFound(paywallId: paywallId)))
                     }
 
                     let products = try await self.getProducts(paywall: paywall)
@@ -77,18 +41,22 @@ public final class IAPManager: IAPManagerProtocol {
                                 id: $0.skProduct.productIdentifier
                             )
                         }
-                        .filter { ids.contains($0.id) }
 
                     guard !products.isEmpty else {
-                        return promise(.failure(.productsNotFound(ids)))
+                        return promise(.failure(.paywallNotFound(paywallId: paywallId)))
                     }
+
+                    let remoteConfig = paywall.remoteConfig
+                        .flatMap { try? JSONSerialization.data(withJSONObject: $0, options: .prettyPrinted) }
+                        .flatMap { try? JSONDecoder().decode(IAPManagerGetResponse.RemoteConfig.self, from: $0) }
 
                     promise(.success(.init(
                         paywall: paywall,
-                        paywallId: self.paywallId,
+                        paywallId: paywallId,
                         paywallVariationId: paywall.variationId,
                         paywallConfigName: paywall.name,
-                        products: products
+                        products: products,
+                        remoteConfig: remoteConfig
                     )))
                 } catch {
                     promise(.failure(.error(error.localizedDescription)))
@@ -98,7 +66,8 @@ public final class IAPManager: IAPManagerProtocol {
     }
 
     public func purchaseProduct(
-        with id: String
+        id: String,
+        paywallId: String
     ) -> Effect<Bool, IAPError> {
         .future { [weak self] promise in
             guard let self else {
@@ -107,8 +76,8 @@ public final class IAPManager: IAPManagerProtocol {
 
             Task {
                 do {
-                    guard let paywall = try await self.getPaywall(id: self.paywallId) else {
-                        return promise(.failure(.paywallNotFound(paywallId: self.paywallId)))
+                    guard let paywall = try await self.getPaywall(id: paywallId) else {
+                        return promise(.failure(.paywallNotFound(paywallId: paywallId)))
                     }
 
                     let products = try await self.getProducts(paywall: paywall)

@@ -15,20 +15,15 @@ public final class IAPManagerMock: IAPManagerProtocol {
         self.hasPremiumAccess = hasPremiumAccess
     }
 
-    public func getProduct(
-        by id: String
-    ) -> Effect<IAPManagerGetResponse, IAPError> {
-        .init(error: .unexpected)
-    }
-
     public func getProducts(
-        by ids: Set<String>
+        paywallId: String
     ) -> Effect<IAPManagerGetResponse, IAPError> {
         .init(error: .unexpected)
     }
 
     public func purchaseProduct(
-        with id: String
+        id: String,
+        paywallId: String
     ) -> Effect<Bool, IAPError> {
         .init(value: true)
     }
