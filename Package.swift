@@ -15,8 +15,7 @@ let package = Package(
     ],
     dependencies: [
         .package(
-            url: "https://github.com/pointfreeco/swift-composable-architecture.git",
-            from: "0.40.2"),
+          url: "https://github.com/pointfreeco/swift-composable-architecture", revision: "5b78fbc"),
         .package(
             url: "https://github.com/adaptyteam/AdaptySDK-iOS.git",
             from: "2.3.4")
